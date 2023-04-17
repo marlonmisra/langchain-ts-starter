@@ -1,10 +1,16 @@
 import * as dotenv from "dotenv";
+import * as readline from 'readline';
 import { OpenAI } from "langchain";
 import { initializeAgentExecutor } from "langchain/agents";
 import { SerpAPI } from "langchain/tools";
 import { Calculator } from "langchain/tools";
 
 dotenv.config();
+
+const rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});
 
 const model = new OpenAI({ temperature: 0 });
 const tools = [
@@ -21,18 +27,32 @@ const executor = await initializeAgentExecutor(
   model,
   "zero-shot-react-description"
 );
-console.log("Loaded agent.");
-
-const input =
-  "Who is Olivia Wilde's boyfriend?" +
-  " What is his current age raised to the 0.23 power?";
-console.log(`Executing with input "${input}"...`);
-
-const result = await executor.call({ input });
-
-console.log(`Got output ${result.output}`);
 
 
+function getUserInput(prompt: string): Promise<string> {
+  return new Promise((resolve) => {
+    rl.question(prompt, (input) => {
+      resolve(input);
+      rl.close();
+    });
+  });
+}
+
+async function main() {
+  const userInput = await getUserInput('Please enter your question: ');
+
+  const input = userInput
+
+  const result = await executor.call({ input });
+
+  console.log(`${result.output}`);
+  
+}
+
+
+
+
+main()
 /*
 import * as dotenv from "dotenv";
 import { OpenAI } from "langchain";
